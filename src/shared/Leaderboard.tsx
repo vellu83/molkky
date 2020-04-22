@@ -4,21 +4,22 @@ import { PlayerState } from '../game/GameInProgress';
 import styled from '@emotion/styled';
 
 type Props = {
-  scores: PlayerState[];
+  playerStates: PlayerState[];
 };
 
-export const Leaderboard = ({ scores }: Props) => {
+export const Leaderboard = ({ playerStates }: Props) => {
   const columns = [
     {
       title: 'Name',
       dataIndex: 'name',
+      multiple: 1,
     },
     {
       title: 'Score',
       dataIndex: 'score',
       sorter: {
         compare: (a: any, b: any) => b.score - a.score,
-        multiple: 3,
+        multiple: 2,
       },
     },
     {
@@ -32,15 +33,17 @@ export const Leaderboard = ({ scores }: Props) => {
     {
       title: 'Eliminated',
       dataIndex: 'isEliminated',
+      multiple: 4,
     },
   ];
 
-  const data = scores.map((s) => ({
-    name: s.player.name,
-    score: s.totalScore,
-    missStrike: s.missStrike,
-    isEliminated: s.isEliminated ? 'X' : '',
+  const data = playerStates.map((ps) => ({
+    name: ps.player.name,
+    score: ps.totalScore,
+    missStrike: ps.missStrike,
+    isEliminated: ps.isEliminated ? 'X' : '',
   }));
+  console.log(data);
 
   function onChange(pagination: any, filters: any, sorter: any, extra: any) {
     console.log('params', pagination, filters, sorter, extra);

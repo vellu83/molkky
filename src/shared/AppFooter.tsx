@@ -1,19 +1,21 @@
-import {
-  BarChartOutlined,
-  FileTextOutlined,
-  SmileOutlined,
-} from '@ant-design/icons';
+import { FileTextOutlined, SmileOutlined } from '@ant-design/icons';
 import { Layout, Menu } from 'antd';
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 
 const { Footer } = Layout;
 
 export const AppFooter = () => {
+  const location = useLocation();
   return (
     <Footer>
       <Menu
         mode='horizontal'
+        selectedKeys={[
+          location.pathname.endsWith('/')
+            ? 'game'
+            : location.pathname.split('/')[1],
+        ]}
         style={{ display: 'flex', justifyContent: 'space-between' }}
       >
         <Menu.Item key='game'>
@@ -30,9 +32,3 @@ export const AppFooter = () => {
     </Footer>
   );
 };
-
-// <Menu.Item key='stats'>
-//           <BarChartOutlined />
-//           <span>Stats</span>
-//           <Link to='/stats' />
-//         </Menu.Item>

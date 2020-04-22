@@ -2,6 +2,7 @@ import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import styled from '@emotion/styled';
 import { Button, Form, Input, Slider, Typography, Layout } from 'antd';
 import React, { CSSProperties } from 'react';
+import fans from './fans.svg';
 
 const { Title } = Typography;
 
@@ -19,6 +20,9 @@ export const NewGame = ({
       <TitleWrapper>
         <Title>New Game</Title>
       </TitleWrapper>
+      <ImageWrapper>
+        <img src={fans} alt='logo'></img>
+      </ImageWrapper>
       <FormWrapper>
         <Form
           style={FormStyle}
@@ -35,7 +39,7 @@ export const NewGame = ({
                     <Form.Item
                       required={false}
                       key='points'
-                      style={{ width: '100%' }}
+                      style={FormItemStyle}
                     >
                       <Slider
                         min={1}
@@ -51,7 +55,7 @@ export const NewGame = ({
                       <Form.Item
                         required={false}
                         key={field.key}
-                        style={{ display: 'flex' }}
+                        style={FormItemStyle}
                       >
                         <Form.Item
                           {...field}
@@ -109,7 +113,7 @@ export const NewGame = ({
 const TitleWrapper = styled.div`
   display: flex;
   justify-content: center;
-  padding: 16px;
+  padding-top: 24px;
 `;
 
 const FormWrapper = styled.div`
@@ -134,6 +138,12 @@ const PointsWrapper = styled.div`
   align-items: center;
 `;
 
+const ImageWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  height: 120px;
+`;
+
 const FormStyle = {
   width: '80%',
   display: 'flex',
@@ -142,5 +152,8 @@ const FormStyle = {
 } as CSSProperties;
 
 const FormItemStyle = {
-  width: '',
-};
+  minWidth: '200px',
+  maxWidth: '400px',
+  flexBasis: 'auto',
+  flexGrow: 1,
+} as CSSProperties;

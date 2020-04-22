@@ -1,5 +1,5 @@
-import React from 'react';
 import { Button } from 'antd';
+import React, { CSSProperties } from 'react';
 
 type Props = {
   value: number;
@@ -13,8 +13,15 @@ export const Skittle = ({ value, onClickHandle }: Props) => {
       shape='circle'
       size='large'
       onClick={() => onClickHandle(value)}
+      style={ButtonStyle}
     >
       {value}
     </Button>
   );
 };
+
+const ButtonStyle = {
+  height: '50px',
+  minWidth: '50px',
+  fontSize: '20px',
+} as CSSProperties;

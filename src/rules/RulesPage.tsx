@@ -3,6 +3,7 @@ import { Layout, Row } from 'antd';
 import React from 'react';
 import { AppFooter } from '../shared/AppFooter';
 import Title from 'antd/lib/typography/Title';
+import outside from './outside.svg';
 const { Content } = Layout;
 
 export const RulesPage = () => {
@@ -14,6 +15,9 @@ export const RulesPage = () => {
         }}
       >
         <Title style={{ textAlign: 'center', margin: '16px' }}>Rules</Title>
+        <ImageWrapper>
+          <img src={outside} alt='logo'></img>
+        </ImageWrapper>
         <Title level={3} style={{ textAlign: 'center' }}>
           Setup
         </Title>
@@ -66,4 +70,11 @@ export const RulesPage = () => {
 const Paragraph = styled.p`
   padding: 12px;
   text-align: justify;
+`;
+
+const ImageWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-left: auto;
+  margin-right: auto;
 `;
