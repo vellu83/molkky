@@ -1,25 +1,27 @@
 import React from 'react';
-import logo from './logo.svg';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import './App.css';
+import { GamePage } from './game/GamePage';
+import { RulesPage } from './rules/RulesPage';
+import { StatsPage } from './stats/StatsPage';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div>
+        <Switch>
+          <Route exact path='/rules'>
+            <RulesPage />
+          </Route>
+          <Route exact path='/'>
+            <GamePage />
+          </Route>
+          <Route exact path='/stats'>
+            <StatsPage />
+          </Route>
+        </Switch>
+      </div>
+    </Router>
   );
 }
 
