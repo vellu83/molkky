@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { Layout, Result, Button, Modal } from 'antd';
 import Title from 'antd/lib/typography/Title';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { LastPlays } from '../shared/LastPlays';
 import { Leaderboard } from '../shared/Leaderboard';
 import { SkittlePositions } from '../shared/SkittlePositions';
@@ -44,7 +44,7 @@ export const GameInProgress = ({
   );
   const [plays, setPlays] = useState<Play[]>([]);
   const [gameHistory, setGameHistory] = useState<GameState[]>([]);
-  const [showResults, setShowresults] = useState(false);
+  const [winner, setWinner] = useState<Player>('');
 
   useEffect(() => {
     let initialGameStep = new Map<Player, PlayerState>();
@@ -59,6 +59,27 @@ export const GameInProgress = ({
     setGameHistory([initialGameStep]);
   }, [players]);
 
+  useEffect(() => {
+    const gameState = gameHistory[gameHistory.length - 1];
+    if (!gameState || !plays || plays.length < 1) {
+      return;
+    }
+    const currentPlayerState = gameState.get(currentPlayer)!;
+    if (plays.slice(-1)[0].player === currentPlayer) {
+      return;
+    }
+    warnVlugul(currentPlayerState);
+  }, [gameHistory, plays, currentPlayer]);
+
+  useEffect(() => {
+    const gameState = gameHistory[gameHistory.length - 1];
+    if (!gameState) {
+      return;
+    }
+    isGameFinished(gameState);
+    nextTurn(gameState);
+  }, [gameHistory]);
+
   const setWinnerPlayer = (playerState: PlayerState) => {
     return {
       ...playerState,
@@ -66,33 +87,30 @@ export const GameInProgress = ({
     };
   };
 
-  const getWinnerPlayer = (): Player => {
-    const previousGameState = gameHistory[gameHistory.length - 1];
-    return [...previousGameState]
-      .filter(([k, v]) => v.hasWon)
-      .map(([k, v]) => k)[0];
+  const getWinnerPlayer = (gameState: GameState): Player => {
+    return [...gameState].filter(([k, v]) => v.hasWon).map(([k, v]) => k)[0];
   };
 
-  const getRunningPlayers = (): Player[] => {
-    const previousGameState = gameHistory[gameHistory.length - 1];
-    return [...previousGameState]
+  const isGameFinished = (gameState: GameState) => {
+    const runningPlayers = getRunningPlayers(gameState);
+    const winnerPlayer = getWinnerPlayer(gameState);
+    if (winnerPlayer) {
+      setWinner(winnerPlayer);
+    }
+    if (runningPlayers.length === 1) {
+      const winnerPlayer = runningPlayers[0]!;
+      const winnerPlayerState = setWinnerPlayer(gameState.get(winnerPlayer)!);
+      const newGameState = new Map(gameState);
+      newGameState.set(winnerPlayer, winnerPlayerState);
+      setGameHistory([...gameHistory, newGameState]);
+      setWinner(winnerPlayer);
+    }
+  };
+
+  const getRunningPlayers = (gameState: GameState): Player[] => {
+    return [...gameState]
       .filter(([k, v]) => !v.isEliminated)
       .map(([k, v]) => k);
-  };
-
-  const hasPlayerWon = (playerState: PlayerState) => {
-    if (playerState.hasWon) {
-      setShowresults(true);
-    }
-  };
-
-  const hasPlayerLost = (playerState: PlayerState) => {
-    if (playerState.isEliminated) {
-      Modal.error({
-        title: 'VLUGUL!',
-        content: `${currentPlayer} is Out!`,
-      });
-    }
   };
 
   const warnVlugul = (playerState: PlayerState) => {
@@ -107,6 +125,12 @@ export const GameInProgress = ({
   const onMissedPlay = (play: Play): PlayerState => {
     const playerState = gameHistory[gameHistory.length - 1].get(play.player)!;
     const newMissStrike = playerState.missStrike + 1;
+    if (newMissStrike === 3) {
+      Modal.error({
+        title: 'VLUGUL!',
+        content: `${currentPlayer} is Out!`,
+      });
+    }
     return {
       ...playerState,
       missStrike: newMissStrike,
@@ -125,27 +149,14 @@ export const GameInProgress = ({
     };
   };
 
-  const nextTurn = () => {
-    const previousGameState = gameHistory[gameHistory.length - 1];
-    const runningPlayers = getRunningPlayers();
-
-    if (runningPlayers.length === 1) {
-      const winningPlayer = runningPlayers[0]!;
-      const winningPlayerState = setWinnerPlayer(
-        previousGameState.get(winningPlayer)!
-      );
-      const newGameState = new Map(previousGameState);
-      newGameState.set(winningPlayer, winningPlayerState);
-      setGameHistory([...gameHistory, newGameState]);
-      setShowresults(true);
-    }
+  const nextTurn = (gameState: GameState) => {
+    const runningPlayers = getRunningPlayers(gameState);
     const lastRunningPlayerIndex = runningPlayers.indexOf(currentPlayer);
     const nextPlayer =
       lastRunningPlayerIndex < runningPlayers.length - 1
         ? runningPlayers[lastRunningPlayerIndex + 1]
         : runningPlayers[0];
     setCurrentPlayer(nextPlayer);
-    warnVlugul(previousGameState.get(nextPlayer)!);
   };
 
   const onPlayed = (score: number) => {
@@ -161,10 +172,6 @@ export const GameInProgress = ({
     const newGameState = new Map(gameHistory[gameHistory.length - 1]);
     newGameState.set(player, playerState);
     setGameHistory([...gameHistory, newGameState]);
-
-    hasPlayerWon(playerState);
-    hasPlayerLost(playerState);
-    nextTurn();
   };
 
   const onPlayAgain = () => {
@@ -172,21 +179,21 @@ export const GameInProgress = ({
     onPlayAgainHandle();
   };
 
-  const getLastGameState = (): GameState => {
-    return gameHistory[gameHistory.length - 1];
-  };
-
-  const onUndoLast = () => {
+  const onUndoLast = useCallback(() => {
     if (gameHistory.length < 2) {
       return;
     }
-    const runningPlayers = getRunningPlayers();
-    const lastRunningPlayerIndex = runningPlayers.indexOf(currentPlayer);
+    const lastGameState = gameHistory[gameHistory.length - 1];
+    console.log(lastGameState);
+    const runningPlayers = getRunningPlayers(lastGameState);
+    const lastPlayerRunningIndex = runningPlayers.indexOf(currentPlayer);
+    console.log(currentPlayer);
     const previousPlayer =
-      lastRunningPlayerIndex > 0
-        ? runningPlayers[lastRunningPlayerIndex - 1]
+      lastPlayerRunningIndex > 0
+        ? runningPlayers[lastPlayerRunningIndex - 1]
         : runningPlayers[runningPlayers.length - 1];
     setCurrentPlayer(previousPlayer);
+    console.log(previousPlayer);
 
     const previousGameHistory = Array.from(gameHistory)!;
     previousGameHistory.pop();
@@ -196,17 +203,41 @@ export const GameInProgress = ({
     previousPlays.pop();
     setPlays(previousPlays);
 
-    setShowresults(false);
-    warnVlugul(
-      previousGameHistory[previousGameHistory.length - 1].get(previousPlayer)!
-    );
-  };
+    setWinner('');
+  }, [gameHistory, currentPlayer, plays]);
+  // const onUndoLast = () => {
+  //   if (gameHistory.length < 2) {
+  //     return;
+  //   }
+  //   const lastGameState = gameHistory[gameHistory.length - 1];
+  //   const runningPlayers = getRunningPlayers(lastGameState);
+  //   const lastPlayerRunningIndex = runningPlayers.indexOf(currentPlayer);
+  //   console.log(runningPlayers);
+  //   console.log(lastPlayerRunningIndex);
+  //   const previousPlayer =
+  //     lastPlayerRunningIndex > 0
+  //       ? runningPlayers[lastPlayerRunningIndex - 1]
+  //       : runningPlayers[runningPlayers.length - 1];
+  //   console.log('current', currentPlayer);
+  //   console.log('previous', previousPlayer);
+  //   setCurrentPlayer(previousPlayer);
+
+  //   const previousGameHistory = Array.from(gameHistory)!;
+  //   previousGameHistory.pop();
+  //   setGameHistory(previousGameHistory);
+
+  //   const previousPlays = Array.from(plays)!;
+  //   previousPlays.pop();
+  //   setPlays(previousPlays);
+
+  //   setWinner('');
+  // };
 
   return (
     <Layout className='layout' style={{ width: '100%', height: '100%' }}>
       <Content>
         <ContentWrapper>
-          {!showResults ? (
+          {!winner ? (
             <GameWrapper>
               <Title
                 level={2}
@@ -221,7 +252,7 @@ export const GameInProgress = ({
               <Result
                 status='success'
                 icon={<SmileOutlined />}
-                title={`${getWinnerPlayer()} has won!!!`}
+                title={`${winner} has won!!!`}
                 extra={
                   <Button type='primary' onClick={() => onPlayAgain()}>
                     Play again!
@@ -240,11 +271,7 @@ export const GameInProgress = ({
               <LastPlays plays={plays}></LastPlays>
             </ButtonWrapper>
             <ButtonWrapper>
-              <Button
-                danger
-                icon={<UndoOutlined />}
-                onClick={() => onUndoLast()}
-              >
+              <Button danger icon={<UndoOutlined />} onClick={onUndoLast}>
                 Undo last
               </Button>
             </ButtonWrapper>
