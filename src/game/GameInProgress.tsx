@@ -111,17 +111,24 @@ export const GameInProgress = ({
     setShowresults(true);
   };
 
+  const getUpdatedPlayerStates = (ps: PlayerState, idx: number) => {
+    return [
+      ...playerStates.slice(0, idx),
+      ps,
+      ...playerStates.slice(idx + 1, playerStates.length),
+    ];
+  };
+
   const onPlayed = (value: number) => {
     setPlays([...plays, { player: currentPlayer, score: value }]);
     let newPlayerState: PlayerState;
     value === 0
       ? (newPlayerState = onMissedPlay())
       : (newPlayerState = onSuccessfulPlay(value));
-    const newPlayerStates = [
-      ...playerStates.slice(0, currentPlayerIndex),
+    const newPlayerStates = getUpdatedPlayerStates(
       newPlayerState,
-      ...playerStates.slice(currentPlayerIndex + 1, playerStates.length),
-    ];
+      currentPlayerIndex
+    );
     setCurrentPlayerState(newPlayerState);
     setPlayerStates(newPlayerStates);
     currentPlayerState!.hasWon ||
@@ -178,10 +185,11 @@ export const GameInProgress = ({
           : lastPlayerState.missStrike,
     };
 
-    const previousPlayerStates = [
-      ...playerStates.filter((ps) => ps.player !== lastPlayer),
+    const previousPlayerStates = getUpdatedPlayerStates(
       lastPlayerPreviousState,
-    ];
+      lastPlayerIndex
+    );
+
     setCurrentPlayer(lastPlayer);
     setCurrentPlayerIndex(lastPlayerIndex);
     setCurrentPlayerState(lastPlayerPreviousState);

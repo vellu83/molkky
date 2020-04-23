@@ -1,7 +1,7 @@
+import styled from '@emotion/styled';
 import { Table } from 'antd';
 import React from 'react';
 import { PlayerState } from '../game/GameInProgress';
-import styled from '@emotion/styled';
 
 type Props = {
   playerStates: PlayerState[];
@@ -31,7 +31,7 @@ export const Leaderboard = ({ playerStates }: Props) => {
       },
     },
     {
-      title: 'Eliminated',
+      title: 'Out',
       dataIndex: 'isEliminated',
       multiple: 4,
     },
@@ -43,11 +43,7 @@ export const Leaderboard = ({ playerStates }: Props) => {
     missStrike: ps.missStrike,
     isEliminated: ps.isEliminated ? 'X' : '',
   }));
-  console.log(data);
 
-  function onChange(pagination: any, filters: any, sorter: any, extra: any) {
-    console.log('params', pagination, filters, sorter, extra);
-  }
   return (
     <TableWrapper>
       <Table
@@ -55,12 +51,11 @@ export const Leaderboard = ({ playerStates }: Props) => {
         pagination={false}
         dataSource={data}
         rowKey='name'
-        onChange={onChange}
       />
     </TableWrapper>
   );
 };
 
 const TableWrapper = styled.div`
-  margin: 16px 4px;
+  margin: 6px 2px;
 `;

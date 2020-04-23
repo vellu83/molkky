@@ -1,8 +1,8 @@
 import styled from '@emotion/styled';
-import { Layout, Row } from 'antd';
+import { Layout } from 'antd';
+import Title from 'antd/lib/typography/Title';
 import React from 'react';
 import { AppFooter } from '../shared/AppFooter';
-import Title from 'antd/lib/typography/Title';
 import outside from './outside.svg';
 const { Content } = Layout;
 
@@ -68,7 +68,7 @@ export const RulesPage = () => {
 };
 
 const Paragraph = styled.p`
-  padding: 12px;
+  padding: 16px;
   text-align: justify;
 `;
 
@@ -77,4 +77,5 @@ const ImageWrapper = styled.div`
   justify-content: center;
   margin-left: auto;
   margin-right: auto;
+  height: 120px;
 `;

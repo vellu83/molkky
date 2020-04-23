@@ -34,7 +34,7 @@ export const GamePage = () => {
   };
 
   return (
-    <Layout className='layout' style={{ height: '100vh' }}>
+    <Layout className='layout' style={{ height: '100vh', width: '100%' }}>
       <Content style={{ overflow: 'auto' }}>
         {!isPlaying ? (
           <NewGame
