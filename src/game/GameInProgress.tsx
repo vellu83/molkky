@@ -1,12 +1,12 @@
 import styled from '@emotion/styled';
 import { Layout, Result, Button, Modal } from 'antd';
 import Title from 'antd/lib/typography/Title';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LastPlays } from '../shared/LastPlays';
 import { Leaderboard } from '../shared/Leaderboard';
 import { SkittlePositions } from '../shared/SkittlePositions';
-import { Player } from './GamePage';
 import { SmileOutlined, UndoOutlined } from '@ant-design/icons';
+import { Player } from './GamePage';
 
 const { Content } = Layout;
 
@@ -15,12 +15,13 @@ const getRandomInt = (max: number) => {
 };
 
 export type Play = {
-  player: Player;
+  player: string;
   score: number;
 };
 
-export type PlayerState = {
-  player: Player;
+export type GameState = Map<Player, PlayerState>;
+
+type PlayerState = {
   totalScore: number;
   missStrike: number;
   isEliminated: Boolean;
@@ -38,121 +39,132 @@ export const GameInProgress = ({
   players,
   onPlayAgainHandle,
 }: Props) => {
-  const [currentPlayerIndex, setCurrentPlayerIndex] = useState(
-    getRandomInt(players.length)
-  );
   const [currentPlayer, setCurrentPlayer] = useState<Player>(
-    players[currentPlayerIndex]
+    players[getRandomInt(players.length)]
   );
   const [plays, setPlays] = useState<Play[]>([]);
-  const [playerStates, setPlayerStates] = useState<PlayerState[]>([
-    ...players.map((player) => ({
-      player,
-      totalScore: 0,
-      missStrike: 0,
-      isEliminated: false,
-      hasWon: false,
-    })),
-  ]);
-  const [currentPlayerState, setCurrentPlayerState] = useState<PlayerState>(
-    playerStates.find((ps) => ps.player === currentPlayer)!
-  );
+  const [gameHistory, setGameHistory] = useState<GameState[]>([]);
   const [showResults, setShowresults] = useState(false);
 
-  const getRunningPlayers = () => {
-    return playerStates.filter((ps) => !ps.isEliminated).map((ps) => ps.player);
-  };
-
-  const nextTurn = () => {
-    const runningPlayers = getRunningPlayers();
-    const previousPlayerIndex = runningPlayers.indexOf(currentPlayer);
-    const nextPlayer =
-      runningPlayers[
-        previousPlayerIndex < runningPlayers.length - 1
-          ? previousPlayerIndex + 1
-          : 0
-      ];
-    const nextPlayerIndex = playerStates
-      .map((ps) => ps.player)
-      .indexOf(nextPlayer);
-    const nexPlayerState = playerStates.find((ps) => ps.player === nextPlayer)!;
-    setCurrentPlayer(nextPlayer);
-    setCurrentPlayerIndex(nextPlayerIndex);
-    setCurrentPlayerState(nexPlayerState);
-    mightBeVlugul(nextPlayer);
-  };
-
-  const onMissedPlay = () => {
-    const playerState = currentPlayerState!;
-    playerState.missStrike++;
-    if (playerState.missStrike === 3) {
-      playerState.isEliminated = true;
-      playerIsEliminated();
-      return playerState;
-    }
-    return playerState;
-  };
-
-  const onSuccessfulPlay = (value: number) => {
-    const playerState = currentPlayerState;
-    const newPlayerGameScore = playerState.totalScore + value;
-    playerState.missStrike = 0;
-    newPlayerGameScore <= gamePoints
-      ? (playerState.totalScore = newPlayerGameScore)
-      : (playerState.totalScore = gamePoints / 2);
-    if (newPlayerGameScore === gamePoints) {
-      playerState.hasWon = true;
-      return playerState;
-    }
-    return playerState;
-  };
-
-  const playerHasWon = () => {
-    setShowresults(true);
-  };
-
-  const getUpdatedPlayerStates = (ps: PlayerState, idx: number) => {
-    return [
-      ...playerStates.slice(0, idx),
-      ps,
-      ...playerStates.slice(idx + 1, playerStates.length),
-    ];
-  };
-
-  const onPlayed = (value: number) => {
-    setPlays([...plays, { player: currentPlayer, score: value }]);
-    let newPlayerState: PlayerState;
-    value === 0
-      ? (newPlayerState = onMissedPlay())
-      : (newPlayerState = onSuccessfulPlay(value));
-    const newPlayerStates = getUpdatedPlayerStates(
-      newPlayerState,
-      currentPlayerIndex
+  useEffect(() => {
+    let initialGameStep = new Map<Player, PlayerState>();
+    players.map((player) =>
+      initialGameStep.set(player, {
+        totalScore: 0,
+        missStrike: 0,
+        isEliminated: false,
+        hasWon: false,
+      })
     );
-    setCurrentPlayerState(newPlayerState);
-    setPlayerStates(newPlayerStates);
-    currentPlayerState!.hasWon ||
-    playerStates.filter((ps) => !ps.isEliminated).length === 1
-      ? playerHasWon()
-      : nextTurn();
+    setGameHistory([initialGameStep]);
+  }, [players]);
+
+  const setWinnerPlayer = (playerState: PlayerState) => {
+    return {
+      ...playerState,
+      hasWon: true,
+    };
   };
 
-  const mightBeVlugul = (player: Player) => {
-    if (playerStates.find((ps) => ps.player === player)?.missStrike === 2) {
-      Modal.warning({
+  const getWinnerPlayer = (): Player => {
+    const previousGameState = gameHistory[gameHistory.length - 1];
+    return [...previousGameState]
+      .filter(([k, v]) => v.hasWon)
+      .map(([k, v]) => k)[0];
+  };
+
+  const getRunningPlayers = (): Player[] => {
+    const previousGameState = gameHistory[gameHistory.length - 1];
+    return [...previousGameState]
+      .filter(([k, v]) => !v.isEliminated)
+      .map(([k, v]) => k);
+  };
+
+  const hasPlayerWon = (playerState: PlayerState) => {
+    if (playerState.hasWon) {
+      setShowresults(true);
+    }
+  };
+
+  const hasPlayerLost = (playerState: PlayerState) => {
+    if (playerState.isEliminated) {
+      Modal.error({
         title: 'VLUGUL!',
-        content: 'the player must hit a skittle or is eliminated',
+        content: `${currentPlayer} is Out!`,
       });
     }
   };
 
-  const playerIsEliminated = () => {
-    const playerState = currentPlayerState!;
-    playerState.isEliminated = true;
-    Modal.error({
-      title: 'VLUGUL!',
-      content: `${playerState.player.name} is eliminated`,
-    });
+  const warnVlugul = (playerState: PlayerState) => {
+    if (playerState.missStrike === 2) {
+      Modal.warning({
+        title: 'VLUGUL!',
+        content: `${currentPlayer} must hit a skittle or is eliminated`,
+      });
+    }
+  };
+
+  const onMissedPlay = (play: Play): PlayerState => {
+    const playerState = gameHistory[gameHistory.length - 1].get(play.player)!;
+    const newMissStrike = playerState.missStrike + 1;
+    return {
+      ...playerState,
+      missStrike: newMissStrike,
+      isEliminated: newMissStrike === 3 ? true : false,
+    };
+  };
+
+  const onSuccessfulPlay = (play: Play): PlayerState => {
+    const playerState = gameHistory[gameHistory.length - 1].get(play.player)!;
+    const newScore = playerState.totalScore + play.score;
+    return {
+      ...playerState,
+      totalScore: newScore <= gamePoints ? newScore : gamePoints / 2,
+      hasWon: newScore === gamePoints ? true : false,
+      missStrike: 0,
+    };
+  };
+
+  const nextTurn = () => {
+    const previousGameState = gameHistory[gameHistory.length - 1];
+    const runningPlayers = getRunningPlayers();
+
+    if (runningPlayers.length === 1) {
+      const winningPlayer = runningPlayers[0]!;
+      const winningPlayerState = setWinnerPlayer(
+        previousGameState.get(winningPlayer)!
+      );
+      const newGameState = new Map(previousGameState);
+      newGameState.set(winningPlayer, winningPlayerState);
+      setGameHistory([...gameHistory, newGameState]);
+      setShowresults(true);
+    }
+    const lastRunningPlayerIndex = runningPlayers.indexOf(currentPlayer);
+    const nextPlayer =
+      lastRunningPlayerIndex < runningPlayers.length - 1
+        ? runningPlayers[lastRunningPlayerIndex + 1]
+        : runningPlayers[0];
+    setCurrentPlayer(nextPlayer);
+    warnVlugul(previousGameState.get(nextPlayer)!);
+  };
+
+  const onPlayed = (score: number) => {
+    const player = currentPlayer as Player;
+    const play = { player, score };
+    setPlays([...plays, play]);
+
+    let playerState: PlayerState;
+    score === 0
+      ? (playerState = onMissedPlay(play))
+      : (playerState = onSuccessfulPlay(play));
+
+    const newGameState = new Map(gameHistory[gameHistory.length - 1]);
+    newGameState.set(player, playerState);
+    setGameHistory([...gameHistory, newGameState]);
+
+    hasPlayerWon(playerState);
+    hasPlayerLost(playerState);
+    nextTurn();
   };
 
   const onPlayAgain = () => {
@@ -160,42 +172,34 @@ export const GameInProgress = ({
     onPlayAgainHandle();
   };
 
+  const getLastGameState = (): GameState => {
+    return gameHistory[gameHistory.length - 1];
+  };
+
   const onUndoLast = () => {
-    if (plays.length === 0) {
+    if (gameHistory.length < 2) {
       return;
     }
-    let previousPlays = plays;
-    const lastPlay = previousPlays.pop();
+    const runningPlayers = getRunningPlayers();
+    const lastRunningPlayerIndex = runningPlayers.indexOf(currentPlayer);
+    const previousPlayer =
+      lastRunningPlayerIndex > 0
+        ? runningPlayers[lastRunningPlayerIndex - 1]
+        : runningPlayers[runningPlayers.length - 1];
+    setCurrentPlayer(previousPlayer);
+
+    const previousGameHistory = Array.from(gameHistory)!;
+    previousGameHistory.pop();
+    setGameHistory(previousGameHistory);
+
+    const previousPlays = Array.from(plays)!;
+    previousPlays.pop();
     setPlays(previousPlays);
 
-    const lastPlayer = lastPlay!.player;
-    const lastPlayerState = playerStates.find(
-      (ps) => ps.player === lastPlayer
-    )!;
-    const lastPlayerIndex = players.indexOf(lastPlayer);
-    const lastScore = lastPlay!.score;
-    const lastPlayerPreviousState = {
-      player: lastPlayer,
-      totalScore: lastPlayerState.totalScore - lastScore,
-      isEliminated: false,
-      hasWon: false,
-      missStrike:
-        lastPlay?.score === 0
-          ? lastPlayerState.missStrike - 1
-          : lastPlayerState.missStrike,
-    };
-
-    const previousPlayerStates = getUpdatedPlayerStates(
-      lastPlayerPreviousState,
-      lastPlayerIndex
-    );
-
-    setCurrentPlayer(lastPlayer);
-    setCurrentPlayerIndex(lastPlayerIndex);
-    setCurrentPlayerState(lastPlayerPreviousState);
-    setPlayerStates(previousPlayerStates);
     setShowresults(false);
-    mightBeVlugul(lastPlayer);
+    warnVlugul(
+      previousGameHistory[previousGameHistory.length - 1].get(previousPlayer)!
+    );
   };
 
   return (
@@ -207,7 +211,7 @@ export const GameInProgress = ({
               <Title
                 level={2}
                 style={{ marginTop: '24px' }}
-              >{`${currentPlayer.name} is playing...`}</Title>
+              >{`${currentPlayer} is playing...`}</Title>
               <SkittlePositions
                 onClickHandle={(v: number) => onPlayed(v)}
               ></SkittlePositions>
@@ -217,11 +221,7 @@ export const GameInProgress = ({
               <Result
                 status='success'
                 icon={<SmileOutlined />}
-                title={`${
-                  currentPlayerState!.hasWon
-                    ? currentPlayer.name
-                    : playerStates.find((ps) => !ps.isEliminated)?.player.name
-                } has won!!!`}
+                title={`${getWinnerPlayer()} has won!!!`}
                 extra={
                   <Button type='primary' onClick={() => onPlayAgain()}>
                     Play again!
@@ -230,7 +230,11 @@ export const GameInProgress = ({
               />
             </ResultsWrapper>
           )}
-          <Leaderboard playerStates={playerStates}></Leaderboard>
+          {gameHistory.length > 1 && (
+            <Leaderboard
+              gameState={gameHistory[gameHistory.length - 1]}
+            ></Leaderboard>
+          )}
           <ButtonsWrapper>
             <ButtonWrapper>
               <LastPlays plays={plays}></LastPlays>

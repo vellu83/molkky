@@ -1,13 +1,13 @@
 import styled from '@emotion/styled';
 import { Table } from 'antd';
 import React from 'react';
-import { PlayerState } from '../game/GameInProgress';
+import { GameState } from '../game/GameInProgress';
 
 type Props = {
-  playerStates: PlayerState[];
+  gameState: GameState;
 };
 
-export const Leaderboard = ({ playerStates }: Props) => {
+export const Leaderboard = ({ gameState }: Props) => {
   const columns = [
     {
       title: 'Name',
@@ -37,11 +37,11 @@ export const Leaderboard = ({ playerStates }: Props) => {
     },
   ];
 
-  const data = playerStates.map((ps) => ({
-    name: ps.player.name,
-    score: ps.totalScore,
-    missStrike: ps.missStrike,
-    isEliminated: ps.isEliminated ? 'X' : '',
+  const data = [...gameState].map(([player, state]) => ({
+    name: player,
+    score: state.totalScore,
+    missStrike: state.missStrike,
+    isEliminated: state.isEliminated ? 'X' : '',
   }));
 
   return (
