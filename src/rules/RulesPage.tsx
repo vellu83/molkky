@@ -8,7 +8,7 @@ const { Content } = Layout;
 
 export const RulesPage = () => {
   return (
-    <Layout className='layout'>
+    <Layout className='layout' style={{ height: '100vh', width: '100%' }}>
       <Content
         style={{
           overflow: 'auto',

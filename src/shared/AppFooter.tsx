@@ -8,7 +8,7 @@ const { Footer } = Layout;
 export const AppFooter = () => {
   const location = useLocation();
   return (
-    <Footer>
+    <Footer style={{ bottom: 0, padding: '16px 24px' }}>
       <Menu
         mode='horizontal'
         selectedKeys={[
