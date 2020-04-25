@@ -6,12 +6,7 @@ import { NewGame } from './NewGame';
 
 const { Content } = Layout;
 
-export type Player = {
-  name: string;
-  points: number;
-  lastThrow: number;
-  wins: number;
-};
+export type Player = string;
 
 export const GamePage = () => {
   const [isPlaying, setPlaying] = useState(false);
@@ -23,7 +18,7 @@ export const GamePage = () => {
   };
 
   const onFinishHandle = (values: any) => {
-    setPlayers(values.players.map((v: string) => ({ name: v })));
+    setPlayers(values.players);
     setPlaying(true);
   };
 

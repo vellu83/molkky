@@ -14,13 +14,11 @@ export const RulesPage = () => {
           overflow: 'auto',
         }}
       >
-        <Title style={{ textAlign: 'center', margin: '16px' }}>Rules</Title>
+        <StyledTitle1>Rules</StyledTitle1>
         <ImageWrapper>
           <img src={outside} alt='logo'></img>
         </ImageWrapper>
-        <Title level={3} style={{ textAlign: 'center' }}>
-          Setup
-        </Title>
+        <StyledTitle3 level={3}>Setup</StyledTitle3>
         <Paragraph>
           The pins are initially placed in a tight group in an upright position
           3–4 meters away from the throwing line, with the pins organized as
@@ -28,9 +26,7 @@ export const RulesPage = () => {
           7/9/8.
         </Paragraph>
 
-        <Title level={3} style={{ textAlign: 'center' }}>
-          Scoring points
-        </Title>
+        <StyledTitle3 level={3}>Scoring points</StyledTitle3>
         <Paragraph>
           The players use a wooden pin to try to knock over wooden pins (also
           called "skittles") of almost similar dimensions with the throwing pin,
@@ -43,9 +39,7 @@ export const RulesPage = () => {
           exact location where they landed.
         </Paragraph>
 
-        <Title level={3} style={{ textAlign: 'center' }}>
-          Goal
-        </Title>
+        <StyledTitle3 level={3}>Goal</StyledTitle3>
         <Paragraph>
           The first one to reach exactly 50 points wins the game. Scoring more
           than 50 will be penalised by setting the player's score back to 25
@@ -53,9 +47,7 @@ export const RulesPage = () => {
           the target pins three times in a row.
         </Paragraph>
 
-        <Title level={3} style={{ textAlign: 'center' }}>
-          Fun fact
-        </Title>
+        <StyledTitle3 level={3}>Fun fact</StyledTitle3>
         <Paragraph>
           Due to the quirky nature of the starting arrangement, a song was
           produced to help young players in the UK remember the order. To the
@@ -78,4 +70,13 @@ const ImageWrapper = styled.div`
   margin-left: auto;
   margin-right: auto;
   height: 120px;
+`;
+
+const StyledTitle1 = styled(Title)`
+  text-align: 'center';
+  margin: '16px';
+`;
+
+const StyledTitle3 = styled(Title)`
+  text-align: 'center';
 `;

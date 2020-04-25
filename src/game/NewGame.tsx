@@ -1,7 +1,7 @@
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import styled from '@emotion/styled';
 import { Button, Form, Input, Slider, Typography, Layout } from 'antd';
-import React, { CSSProperties } from 'react';
+import React, { useState } from 'react';
 import fans from './fans.svg';
 
 const { Title } = Typography;
@@ -15,113 +15,92 @@ export const NewGame = ({
   onGamePointsChangeHandle,
   onFinishHandle,
 }: Props) => {
+  const [numberPlayers, setNumberPlayers] = useState(0);
+
   return (
     <Layout className='layout' style={{ width: '100%' }}>
-      <TitleWrapper>
-        <Title>New Game</Title>
-      </TitleWrapper>
+      <StyledTitle>New Game</StyledTitle>
       <ImageWrapper>
         <img src={fans} alt='logo'></img>
       </ImageWrapper>
-      <FormWrapper>
-        <Form
-          style={FormStyle}
-          name='dynamic_form_item'
-          initialValues={{ remember: true }}
-          onFinish={(values) => onFinishHandle(values)}
-        >
-          <Form.List name='players'>
-            {(fields, { add, remove }) => {
-              return (
-                <div>
-                  <PointsWrapper>
-                    <Title level={4}>Game Points</Title>
-                    <Form.Item
-                      required={false}
-                      key='points'
-                      style={FormItemStyle}
-                    >
-                      <Slider
-                        min={1}
-                        max={100}
-                        defaultValue={50}
-                        onChange={(value) => onGamePointsChangeHandle(value)}
-                      />
-                    </Form.Item>
-                  </PointsWrapper>
-                  <PlayersWrapper>
-                    <Title level={4}>Players</Title>
-                    {fields.map((field, index) => (
+      <StyledForm
+        name='dynamic_form_item'
+        initialValues={{ remember: true }}
+        onFinish={(values) => onFinishHandle(values)}
+      >
+        <Form.List name='players'>
+          {(fields, { add, remove }) => {
+            return (
+              <div>
+                <StyledTitle level={4}>Game Points</StyledTitle>
+                <StyledFormItem key='points'>
+                  <Slider
+                    min={1}
+                    max={100}
+                    defaultValue={50}
+                    onChange={(value) => onGamePointsChangeHandle(value)}
+                  />
+                </StyledFormItem>
+                <PlayersWrapper>
+                  <Title level={4}>Players</Title>
+                  {fields.map((field, index) => (
+                    <StyledFormItem required={false} key={field.key}>
                       <Form.Item
-                        required={false}
-                        key={field.key}
-                        style={FormItemStyle}
+                        {...field}
+                        validateTrigger={['onChange', 'onBlur']}
+                        rules={[
+                          {
+                            required: true,
+                            whitespace: true,
+                            message: 'give a name or delete the field',
+                          },
+                        ]}
+                        noStyle
                       >
-                        <Form.Item
-                          {...field}
-                          validateTrigger={['onChange', 'onBlur']}
-                          rules={[
-                            {
-                              required: true,
-                              whitespace: true,
-                              message:
-                                "Please input player's name or delete this field.",
-                            },
-                          ]}
-                          noStyle
-                        >
-                          <Input placeholder='name' style={{ width: '80%' }} />
-                        </Form.Item>
-                        {fields.length > 1 ? (
-                          <MinusCircleOutlined
-                            className='dynamic-delete-button'
-                            style={{ margin: '0 8px' }}
-                            onClick={() => {
-                              remove(field.name);
-                            }}
-                          />
-                        ) : null}
+                        <StyledInput placeholder='name' />
                       </Form.Item>
-                    ))}
-                    <Form.Item>
-                      <Button
-                        type='dashed'
-                        onClick={() => {
-                          add();
-                        }}
-                      >
-                        <PlusOutlined /> Add player
-                      </Button>
-                    </Form.Item>
-                  </PlayersWrapper>
-                </div>
-              );
-            }}
-          </Form.List>
+                      {fields.length > 1 && (
+                        <StyledMinusCircleOutlined
+                          className='dynamic-delete-button'
+                          onClick={() => {
+                            setNumberPlayers(numberPlayers - 1);
+                            remove(field.name);
+                          }}
+                        />
+                      )}
+                    </StyledFormItem>
+                  ))}
+                  <Form.Item>
+                    <Button
+                      type='dashed'
+                      onClick={() => {
+                        setNumberPlayers(numberPlayers + 1);
+                        add();
+                      }}
+                    >
+                      <PlusOutlined /> Add player
+                    </Button>
+                  </Form.Item>
+                </PlayersWrapper>
+              </div>
+            );
+          }}
+        </Form.List>
 
-          <Form.Item>
-            <Button type='primary' htmlType='submit'>
-              Play
-            </Button>
-          </Form.Item>
-        </Form>
-      </FormWrapper>
+        <Form.Item>
+          <Button type='primary' htmlType='submit' disabled={numberPlayers < 2}>
+            Play
+          </Button>
+        </Form.Item>
+      </StyledForm>
     </Layout>
   );
 };
 
-const TitleWrapper = styled.div`
+const StyledTitle = styled(Title)`
   display: flex;
   justify-content: center;
   padding-top: 24px;
-`;
-
-const FormWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  padding: 4px 24px;
-  height: 100%;
-  align-items: center;
 `;
 
 const PlayersWrapper = styled.div`
@@ -129,13 +108,11 @@ const PlayersWrapper = styled.div`
   flex-direction: column;
   padding: 4px 24px;
   align-items: center;
-`;
 
-const PointsWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  padding: 4px 24px;
-  align-items: center;
+  .ant-form-item-control-input-content {
+    display: flex;
+    align-items: center;
+  }
 `;
 
 const ImageWrapper = styled.div`
@@ -144,16 +121,26 @@ const ImageWrapper = styled.div`
   height: 120px;
 `;
 
-const FormStyle = {
-  width: '80%',
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-} as CSSProperties;
+const StyledFormItem = styled(Form.Item)`
+  display: flex;
+  align-items: center;
+  min-width: 200px;
+  max-width: 400px;
+  flex-basis: auto;
+  flex-grow: 1;
+`;
 
-const FormItemStyle = {
-  minWidth: '200px',
-  maxWidth: '400px',
-  flexBasis: 'auto',
-  flexGrow: 1,
-} as CSSProperties;
+const StyledForm = styled(Form)`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const StyledInput = styled(Input)`
+  width: 100%;
+`;
+
+const StyledMinusCircleOutlined = styled(MinusCircleOutlined)`
+  margin: 0 8px;
+`;

@@ -1,6 +1,10 @@
+import { Button, Popover, Timeline } from 'antd';
 import React, { useState } from 'react';
-import { Popover, Button, Timeline } from 'antd';
-import { Play } from '../game/GameInProgress';
+
+type Play = {
+  player: string;
+  score: number;
+};
 
 type Props = {
   plays: Play[];
@@ -25,12 +29,12 @@ export const LastPlays = ({ plays }: Props) => {
             p.score > 0 ? (
               <Timeline.Item color='green'>
                 {p.score > 1
-                  ? `${p.player.name}: ${p.score} points`
-                  : `${p.player.name}: ${p.score} point`}
+                  ? `${p.player}: ${p.score} points`
+                  : `${p.player}: ${p.score} point`}
               </Timeline.Item>
             ) : (
               <Timeline.Item color='red'>
-                {`${p.player.name}: ${p.score} point`}
+                {`${p.player}: ${p.score} point`}
               </Timeline.Item>
             )
           )}
