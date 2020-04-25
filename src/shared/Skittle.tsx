@@ -22,6 +22,7 @@ export const Skittle = ({ value, onClickHandle }: Props) => {
 
 const StyledButton = styled(Button)`
   height: 50px;
+  width: 50px;
   min-width: 50px;
   font-size: 20px;
-`
+`;

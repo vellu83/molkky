@@ -24,9 +24,9 @@ export const Leaderboard = ({ gameState }: Props) => {
     },
     {
       title: 'Misses',
-      dataIndex: 'missStrike',
+      dataIndex: 'missStreak',
       sorter: {
-        compare: (a: any, b: any) => b.missStrike - a.missStrike,
+        compare: (a: any, b: any) => b.missStreak - a.missStreak,
         multiple: 3,
       },
     },
@@ -40,7 +40,7 @@ export const Leaderboard = ({ gameState }: Props) => {
   const data = [...gameState].map(([player, state]) => ({
     name: player,
     score: state.totalScore,
-    missStrike: state.missStrike,
+    missStreak: state.missStreak,
     isEliminated: state.isEliminated ? 'X' : '',
   }));
 

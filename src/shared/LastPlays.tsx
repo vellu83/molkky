@@ -1,6 +1,10 @@
 import { Button, Popover, Timeline } from 'antd';
 import React, { useState } from 'react';
-import { Play } from '../game/GameInProgress';
+
+type Play = {
+  player: string;
+  score: number;
+};
 
 type Props = {
   plays: Play[];
