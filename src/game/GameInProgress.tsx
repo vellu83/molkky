@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { Layout, Result, Button, Modal } from 'antd';
 import Title from 'antd/lib/typography/Title';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { LastPlays } from '../shared/LastPlays';
 import { Leaderboard } from '../shared/Leaderboard';
 import { SkittlePositions } from '../shared/SkittlePositions';
@@ -24,6 +24,8 @@ export type GameState = Map<Player, PlayerState>;
 type PlayerState = {
   totalScore: number;
   missStrike: number;
+  score: number;
+  isCurrentPlayer: boolean;
   isEliminated: Boolean;
   hasWon: Boolean;
 };
@@ -42,16 +44,17 @@ export const GameInProgress = ({
   const [currentPlayer, setCurrentPlayer] = useState<Player>(
     players[getRandomInt(players.length)]
   );
-  const [plays, setPlays] = useState<Play[]>([]);
   const [gameHistory, setGameHistory] = useState<GameState[]>([]);
   const [winner, setWinner] = useState<Player>('');
 
   useEffect(() => {
-    let initialGameStep = new Map<Player, PlayerState>();
-    players.map((player) =>
+    const initialGameStep = new Map<Player, PlayerState>();
+    players.forEach((player) =>
       initialGameStep.set(player, {
         totalScore: 0,
+        score: 0,
         missStrike: 0,
+        isCurrentPlayer: player === currentPlayer,
         isEliminated: false,
         hasWon: false,
       })
@@ -59,17 +62,18 @@ export const GameInProgress = ({
     setGameHistory([initialGameStep]);
   }, [players]);
 
+  const gameHistoryRef = useRef(gameHistory);
   useEffect(() => {
+    const gameHistory = gameHistoryRef.current;
     const gameState = gameHistory[gameHistory.length - 1];
-    if (!gameState || !plays || plays.length < 1) {
+    
+    if (!gameState) {
       return;
     }
+    
     const currentPlayerState = gameState.get(currentPlayer)!;
-    if (plays.slice(-1)[0].player === currentPlayer) {
-      return;
-    }
     warnVlugul(currentPlayerState);
-  }, [gameHistory, plays, currentPlayer]);
+  }, [currentPlayer]);
 
   useEffect(() => {
     const gameState = gameHistory[gameHistory.length - 1];
@@ -103,6 +107,7 @@ export const GameInProgress = ({
       const newGameState = new Map(gameState);
       newGameState.set(winnerPlayer, winnerPlayerState);
       setGameHistory([...gameHistory, newGameState]);
+      gameHistoryRef.current = [...gameHistory, newGameState];
       setWinner(winnerPlayer);
     }
   };
@@ -162,20 +167,19 @@ export const GameInProgress = ({
   const onPlayed = (score: number) => {
     const player = currentPlayer as Player;
     const play = { player, score };
-    setPlays([...plays, play]);
 
-    let playerState: PlayerState;
-    score === 0
-      ? (playerState = onMissedPlay(play))
-      : (playerState = onSuccessfulPlay(play));
+    let playerState =
+      score === 0
+        ? onMissedPlay(play)
+        : onSuccessfulPlay(play);
 
     const newGameState = new Map(gameHistory[gameHistory.length - 1]);
     newGameState.set(player, playerState);
     setGameHistory([...gameHistory, newGameState]);
+    gameHistoryRef.current = [...gameHistory, newGameState];
   };
 
   const onPlayAgain = () => {
-    setPlays([]);
     onPlayAgainHandle();
   };
 
@@ -198,40 +202,10 @@ export const GameInProgress = ({
     const previousGameHistory = Array.from(gameHistory)!;
     previousGameHistory.pop();
     setGameHistory(previousGameHistory);
-
-    const previousPlays = Array.from(plays)!;
-    previousPlays.pop();
-    setPlays(previousPlays);
+    gameHistoryRef.current = previousGameHistory;
 
     setWinner('');
-  }, [gameHistory, currentPlayer, plays]);
-  // const onUndoLast = () => {
-  //   if (gameHistory.length < 2) {
-  //     return;
-  //   }
-  //   const lastGameState = gameHistory[gameHistory.length - 1];
-  //   const runningPlayers = getRunningPlayers(lastGameState);
-  //   const lastPlayerRunningIndex = runningPlayers.indexOf(currentPlayer);
-  //   console.log(runningPlayers);
-  //   console.log(lastPlayerRunningIndex);
-  //   const previousPlayer =
-  //     lastPlayerRunningIndex > 0
-  //       ? runningPlayers[lastPlayerRunningIndex - 1]
-  //       : runningPlayers[runningPlayers.length - 1];
-  //   console.log('current', currentPlayer);
-  //   console.log('previous', previousPlayer);
-  //   setCurrentPlayer(previousPlayer);
-
-  //   const previousGameHistory = Array.from(gameHistory)!;
-  //   previousGameHistory.pop();
-  //   setGameHistory(previousGameHistory);
-
-  //   const previousPlays = Array.from(plays)!;
-  //   previousPlays.pop();
-  //   setPlays(previousPlays);
-
-  //   setWinner('');
-  // };
+  }, [gameHistory, currentPlayer]);
 
   return (
     <Layout className='layout' style={{ width: '100%', height: '100%' }}>
@@ -268,7 +242,17 @@ export const GameInProgress = ({
           )}
           <ButtonsWrapper>
             <ButtonWrapper>
-              <LastPlays plays={plays}></LastPlays>
+              <LastPlays plays={gameHistory.reduce((prev, state) => {
+                const gameState = [...state];
+                const currentPlayerState = gameState.find(([k, v]) => v.isCurrentPlayer)!;
+
+                prev.push({
+                  player: currentPlayerState[0],
+                  score: currentPlayerState[1].score,
+                } as never);
+
+                return prev;
+              }, [])}></LastPlays>
             </ButtonWrapper>
             <ButtonWrapper>
               <Button danger icon={<UndoOutlined />} onClick={onUndoLast}>

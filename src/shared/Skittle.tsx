@@ -1,5 +1,6 @@
 import { Button } from 'antd';
-import React, { CSSProperties } from 'react';
+import styled from '@emotion/styled';
+import React from 'react';
 
 type Props = {
   value: number;
@@ -8,20 +9,19 @@ type Props = {
 
 export const Skittle = ({ value, onClickHandle }: Props) => {
   return (
-    <Button
+    <StyledButton
       type='primary'
       shape='circle'
       size='large'
       onClick={() => onClickHandle(value)}
-      style={ButtonStyle}
     >
       {value}
-    </Button>
+    </StyledButton>
   );
 };
 
-const ButtonStyle = {
-  height: '50px',
-  minWidth: '50px',
-  fontSize: '20px',
-} as CSSProperties;
+const StyledButton = styled(Button)`
+  height: 50px;
+  min-width: 50px;
+  font-size: 20px;
+`

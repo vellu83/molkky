@@ -1,7 +1,7 @@
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import styled from '@emotion/styled';
 import { Button, Form, Input, Slider, Typography, Layout } from 'antd';
-import React, { CSSProperties } from 'react';
+import React from 'react';
 import fans from './fans.svg';
 
 const { Title } = Typography;
@@ -24,8 +24,7 @@ export const NewGame = ({
         <img src={fans} alt='logo'></img>
       </ImageWrapper>
       <FormWrapper>
-        <Form
-          style={FormStyle}
+        <StyledForm
           name='dynamic_form_item'
           initialValues={{ remember: true }}
           onFinish={(values) => onFinishHandle(values)}
@@ -36,10 +35,9 @@ export const NewGame = ({
                 <div>
                   <PointsWrapper>
                     <Title level={4}>Game Points</Title>
-                    <Form.Item
+                    <StyledFormItem
                       required={false}
                       key='points'
-                      style={FormItemStyle}
                     >
                       <Slider
                         min={1}
@@ -47,15 +45,14 @@ export const NewGame = ({
                         defaultValue={50}
                         onChange={(value) => onGamePointsChangeHandle(value)}
                       />
-                    </Form.Item>
+                    </StyledFormItem>
                   </PointsWrapper>
                   <PlayersWrapper>
                     <Title level={4}>Players</Title>
                     {fields.map((field, index) => (
-                      <Form.Item
+                      <StyledFormItem
                         required={false}
                         key={field.key}
-                        style={FormItemStyle}
                       >
                         <Form.Item
                           {...field}
@@ -81,7 +78,7 @@ export const NewGame = ({
                             }}
                           />
                         ) : null}
-                      </Form.Item>
+                      </StyledFormItem>
                     ))}
                     <Form.Item>
                       <Button
@@ -104,7 +101,7 @@ export const NewGame = ({
               Play
             </Button>
           </Form.Item>
-        </Form>
+        </StyledForm>
       </FormWrapper>
     </Layout>
   );
@@ -144,16 +141,16 @@ const ImageWrapper = styled.div`
   height: 120px;
 `;
 
-const FormStyle = {
-  width: '80%',
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-} as CSSProperties;
+const StyledFormItem = styled(Form.Item)`
+  min-width: 200px;
+  max-width: 400px;
+  flex-basis: auto;
+  flex-grow: 1;
+`;
 
-const FormItemStyle = {
-  minWidth: '200px',
-  maxWidth: '400px',
-  flexBasis: 'auto',
-  flexGrow: 1,
-} as CSSProperties;
+const StyledForm = styled(Form)`
+  width: 80%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`
