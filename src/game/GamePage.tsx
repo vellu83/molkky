@@ -1,9 +1,9 @@
 import { Layout } from 'antd';
-import React from 'react';
+import React, { useState } from 'react';
 import { AppFooter } from '../shared/AppFooter';
+import { useStickyState } from '../shared/hook';
 import { GameInProgress } from './GameInProgress';
 import { NewGame } from './NewGame';
-import { useStickyState } from '../shared/hook';
 
 const { Content } = Layout;
 
@@ -13,6 +13,7 @@ export const GamePage = () => {
   const [isPlaying, setPlaying] = useStickyState(false, 'is-playing');
   const [gamePoints, setGamePoints] = useStickyState(50, 'game-points');
   const [players, setPlayers] = useStickyState([] as Player[], 'players');
+  const [lastPlayers, setLastPlayers] = useState<Player[]>([]);
 
   const onGamePointsChangeHandle = (value: number) => {
     setGamePoints(value);
@@ -23,10 +24,12 @@ export const GamePage = () => {
     setPlaying(true);
   };
 
-  const onPlayAgain = (values: any) => {
+  const onNewGameHandle = () => {
+    if (window.localStorage.getItem('players')?.length! > 1) {
+      setLastPlayers(JSON.parse(window.localStorage.getItem('players')!));
+    }
+    window.localStorage.clear();
     setPlaying(false);
-    setPlayers([]);
-    setGamePoints(50);
   };
 
   return (
@@ -34,6 +37,7 @@ export const GamePage = () => {
       <Content style={{ overflow: 'auto' }}>
         {!isPlaying ? (
           <NewGame
+            lastPlayers={lastPlayers}
             onFinishHandle={onFinishHandle}
             onGamePointsChangeHandle={onGamePointsChangeHandle}
           ></NewGame>
@@ -41,7 +45,7 @@ export const GamePage = () => {
           <GameInProgress
             gamePoints={gamePoints}
             players={players}
-            onPlayAgainHandle={onPlayAgain}
+            onNewGameHandle={onNewGameHandle}
           ></GameInProgress>
         )}
       </Content>

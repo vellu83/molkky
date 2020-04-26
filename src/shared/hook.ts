@@ -27,9 +27,7 @@ function replacer(this: any, key: string, value: any) {
 
 function reviver(key: string, value: any) {
   if (typeof value === 'object' && value !== null) {
-    console.log(value);
     if (value.dataType === 'Map') {
-      console.log(new Map(value.value));
       return new Map(value.value);
     }
   }

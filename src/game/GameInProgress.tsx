@@ -1,6 +1,6 @@
-import { SmileOutlined, UndoOutlined, ReloadOutlined } from '@ant-design/icons';
+import { DownOutlined, SmileOutlined, UndoOutlined } from '@ant-design/icons';
 import styled from '@emotion/styled';
-import { Button, Layout, Modal, Result } from 'antd';
+import { Button, Dropdown, Layout, Menu, Modal, Result } from 'antd';
 import Title from 'antd/lib/typography/Title';
 import React, { useCallback, useEffect, useRef } from 'react';
 import { useStickyState } from '../shared/hook';
@@ -29,13 +29,13 @@ type PlayerState = {
 type Props = {
   gamePoints: number;
   players: Player[];
-  onPlayAgainHandle: Function;
+  onNewGameHandle: Function;
 };
 
 export const GameInProgress = ({
   gamePoints,
   players,
-  onPlayAgainHandle,
+  onNewGameHandle,
 }: Props) => {
   const [currentPlayer, setCurrentPlayer] = useStickyState(
     players[getRandomInt(players.length)] as Player,
@@ -212,6 +212,17 @@ export const GameInProgress = ({
     setWinner('');
   }, []);
 
+  const restartMenu = (
+    <Menu
+      onClick={({ key }) => {
+        key === 'restart' ? onPlayAgain() : onNewGameHandle();
+      }}
+    >
+      <Menu.Item key='restart'>Play again</Menu.Item>
+      <Menu.Item key='new'>New game</Menu.Item>
+    </Menu>
+  );
+
   return (
     <Layout className='layout' style={{ width: '100%', height: '100%' }}>
       <Content>
@@ -231,11 +242,6 @@ export const GameInProgress = ({
                 status='success'
                 icon={<SmileOutlined />}
                 title={`${winner} has won!!!`}
-                extra={
-                  <Button type='primary' onClick={() => onPlayAgainHandle()}>
-                    Play again!
-                  </Button>
-                }
               />
             </ResultsWrapper>
           )}
@@ -271,9 +277,11 @@ export const GameInProgress = ({
             <StyledButton danger icon={<UndoOutlined />} onClick={onUndoLast}>
               Undo
             </StyledButton>
-            <StyledButton icon={<ReloadOutlined />} onClick={onPlayAgain}>
-              Restart
-            </StyledButton>
+            <StyledDropdown overlay={restartMenu}>
+              <Button>
+                Restart <DownOutlined />
+              </Button>
+            </StyledDropdown>
           </ButtonsWrapper>
         </ContentWrapper>
       </Content>
@@ -302,13 +310,18 @@ const ResultsWrapper = styled.div`
 
 const ButtonsWrapper = styled.div`
   display: flex;
+  align-items: center;
 `;
 
 const ButtonWrapper = styled.div`
   margin: 12px 18px;
 `;
 const StyledButton = styled(Button)`
-  margin: 12px 18px;
+  margin: 8px 12px;
+`;
+
+const StyledDropdown = styled(Dropdown)`
+  margin: 8px 12px;
 `;
 
 const StyledTitle = styled(Title)`

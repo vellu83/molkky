@@ -1,21 +1,33 @@
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import styled from '@emotion/styled';
-import { Button, Form, Input, Slider, Typography, Layout } from 'antd';
+import {
+  Button,
+  Form,
+  Input,
+  Slider,
+  Typography,
+  Layout,
+  AutoComplete,
+} from 'antd';
 import React, { useState } from 'react';
 import fans from './fans.svg';
+import { Player } from './GamePage';
 
 const { Title } = Typography;
 
 type Props = {
+  lastPlayers: Player[];
   onGamePointsChangeHandle: Function;
   onFinishHandle: Function;
 };
 
 export const NewGame = ({
+  lastPlayers,
   onGamePointsChangeHandle,
   onFinishHandle,
 }: Props) => {
   const [numberPlayers, setNumberPlayers] = useState(0);
+  const [options, setOptions] = useState<{ value: string }[]>([]);
 
   return (
     <Layout className='layout' style={{ width: '100%' }}>
@@ -57,7 +69,22 @@ export const NewGame = ({
                         ]}
                         noStyle
                       >
-                        <StyledInput placeholder='name' />
+                        <StyledInput
+                          placeholder='name'
+                          options={options}
+                          onSearch={(searchText) => {
+                            if (searchText.length === 0) {
+                              return;
+                            }
+                            const options = [] as { value: string }[];
+                            lastPlayers
+                              .filter((p) => p.includes(searchText))
+                              .forEach((p) => {
+                                options.push({ value: p });
+                              });
+                            setOptions(options);
+                          }}
+                        />
                       </Form.Item>
                       {fields.length > 1 && (
                         <StyledMinusCircleOutlined
@@ -137,7 +164,7 @@ const StyledForm = styled(Form)`
   align-items: center;
 `;
 
-const StyledInput = styled(Input)`
+const StyledInput = styled(AutoComplete)`
   width: 100%;
 `;
 
