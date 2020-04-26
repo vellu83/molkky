@@ -1,14 +1,6 @@
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import styled from '@emotion/styled';
-import {
-  Button,
-  Form,
-  Input,
-  Slider,
-  Typography,
-  Layout,
-  AutoComplete,
-} from 'antd';
+import { AutoComplete, Button, Form, Layout, Slider, Typography } from 'antd';
 import React, { useState } from 'react';
 import fans from './fans.svg';
 import { Player } from './GamePage';

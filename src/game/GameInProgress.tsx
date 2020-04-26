@@ -1,4 +1,9 @@
-import { DownOutlined, SmileOutlined, UndoOutlined } from '@ant-design/icons';
+import {
+  DownOutlined,
+  SmileOutlined,
+  UndoOutlined,
+  AudioOutlined,
+} from '@ant-design/icons';
 import styled from '@emotion/styled';
 import { Button, Dropdown, Layout, Menu, Modal, Result } from 'antd';
 import Title from 'antd/lib/typography/Title';
@@ -47,6 +52,12 @@ export const GameInProgress = ({
   );
   const gameHistoryRef = useRef(gameHistory);
   const [winner, setWinner] = useStickyState('' as Player, 'winner');
+  // const [value, setValue] = useState('');
+  // const { listen, listening, stop } = useSpeechRecognition({
+  //   onResult: (result: any) => {
+  //     setValue(result);
+  //   },
+  // });
 
   useEffect(() => {
     if (window.localStorage.getItem('game-history')?.length! > 2) {
@@ -152,22 +163,15 @@ export const GameInProgress = ({
   };
 
   const nextTurn = (gameState: GameState) => {
-    const isLastPlayerEliminated = gameState.get(currentPlayer)?.isEliminated;
-    if (isLastPlayerEliminated) {
-      const playerIndex = players.indexOf(currentPlayer);
-      const nextPlayerIndex = mod(playerIndex + 1, players.length);
-      const nextPlayer = players[nextPlayerIndex];
-      setCurrentPlayer(nextPlayer);
-      return;
-    }
+    const playerIndex = players.indexOf(currentPlayer);
+    let nextPlayerIndex;
+    let i = 0;
+    do {
+      nextPlayerIndex = mod(playerIndex + i + 1, players.length);
+      i++;
+    } while (gameState.get(players[nextPlayerIndex])?.isEliminated);
 
-    const runningPlayers = getRunningPlayers(gameState);
-    const lastRunningPlayerIndex = runningPlayers.indexOf(currentPlayer);
-    const nextPlayerIndex = mod(
-      lastRunningPlayerIndex + 1,
-      runningPlayers.length
-    );
-    const nextPlayer = runningPlayers[nextPlayerIndex];
+    const nextPlayer = players[nextPlayerIndex];
     setCurrentPlayer(nextPlayer);
   };
 
@@ -235,6 +239,13 @@ export const GameInProgress = ({
               <SkittlePositions
                 onClickHandle={(v: number) => onClick(v)}
               ></SkittlePositions>
+              <StyledButton
+                danger
+                icon={<AudioOutlined />}
+                onClick={onUndoLast}
+              >
+                Undo
+              </StyledButton>
             </GameWrapper>
           ) : (
             <ResultsWrapper>
