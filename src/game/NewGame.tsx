@@ -1,7 +1,16 @@
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import styled from '@emotion/styled';
-import { AutoComplete, Button, Form, Layout, Slider, Typography } from 'antd';
-import React, { useState } from 'react';
+import {
+  AutoComplete,
+  Button,
+  Form,
+  Layout,
+  message,
+  Slider,
+  Typography,
+} from 'antd';
+import React, { useEffect, useState } from 'react';
+import { isAndroid, isIOS } from 'react-device-detect';
 import fans from './fans.svg';
 import { Player } from './GamePage';
 
@@ -20,6 +29,19 @@ export const NewGame = ({
 }: Props) => {
   const [numberPlayers, setNumberPlayers] = useState(0);
   const [options, setOptions] = useState<{ value: string }[]>([]);
+
+  useEffect(() => {
+    const isPWAInstalled = window.matchMedia('(display-mode: standalone)')
+      .matches;
+    if (isAndroid && !isPWAInstalled) {
+      message.info('Tap "Add to home screen" to install the app.');
+    }
+    if (isIOS && !isPWAInstalled) {
+      message.info(
+        'Tap the Share button and "Add to home screen" to install the app.'
+      );
+    }
+  }, []);
 
   return (
     <Layout className='layout' style={{ width: '100%' }}>

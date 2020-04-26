@@ -37,7 +37,7 @@ export const SkittlePositions = ({ onClickHandle }: Props) => {
 };
 
 const Root = styled.div`
-  margin: 24px;
+  margin: 18px;
 `;
 
 const SkittleRow = styled.div`

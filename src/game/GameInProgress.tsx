@@ -1,18 +1,28 @@
 import {
+  AudioOutlined,
   DownOutlined,
   SmileOutlined,
   UndoOutlined,
-  AudioOutlined,
 } from '@ant-design/icons';
 import styled from '@emotion/styled';
-import { Button, Dropdown, Layout, Menu, Modal, Result } from 'antd';
+import {
+  Button,
+  Dropdown,
+  Layout,
+  Menu,
+  Modal,
+  notification,
+  Result,
+} from 'antd';
 import Title from 'antd/lib/typography/Title';
 import React, { useCallback, useEffect, useRef } from 'react';
+import { useSpeechRecognition } from 'react-speech-kit';
 import { useStickyState } from '../shared/hook';
 import { LastPlays } from '../shared/LastPlays';
 import { Leaderboard } from '../shared/Leaderboard';
 import { SkittlePositions } from '../shared/SkittlePositions';
 import { Player } from './GamePage';
+const writtenNumber = require('written-number');
 
 const { Content } = Layout;
 
@@ -52,12 +62,22 @@ export const GameInProgress = ({
   );
   const gameHistoryRef = useRef(gameHistory);
   const [winner, setWinner] = useStickyState('' as Player, 'winner');
-  // const [value, setValue] = useState('');
-  // const { listen, listening, stop } = useSpeechRecognition({
-  //   onResult: (result: any) => {
-  //     setValue(result);
-  //   },
-  // });
+  const outcomes: string[] = [
+    ...Array.from({ length: 12 }, (x, i) => `${i}`),
+    ...Array.from({ length: 12 }, (x, i) => writtenNumber(i, { lang: 'fr' })),
+    ...Array.from({ length: 12 }, (x, i) => writtenNumber(i, { lang: 'es' })),
+  ];
+
+  const { listen, listening, stop } = useSpeechRecognition({
+    onResult: (result: string) => {
+      const resultIndex = outcomes.indexOf(result.toLowerCase());
+      if (resultIndex !== -1) {
+        const detectedValue = +outcomes[mod(resultIndex, 12)];
+        onClick(detectedValue);
+        notification.success({ message: `${detectedValue} detected` });
+      }
+    },
+  });
 
   useEffect(() => {
     if (window.localStorage.getItem('game-history')?.length! > 2) {
@@ -240,12 +260,12 @@ export const GameInProgress = ({
                 onClickHandle={(v: number) => onClick(v)}
               ></SkittlePositions>
               <StyledButton
-                danger
+                shape='circle'
+                size='large'
                 icon={<AudioOutlined />}
-                onClick={onUndoLast}
-              >
-                Undo
-              </StyledButton>
+                onMouseDown={listen}
+                onMouseUp={stop}
+              ></StyledButton>
             </GameWrapper>
           ) : (
             <ResultsWrapper>

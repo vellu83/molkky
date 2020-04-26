@@ -16,11 +16,14 @@
     "@types/react-router-dom": "^5.1.4",
     "antd": "^4.1.4",
     "react": "^16.13.1",
+    "react-device-detect": "^1.12.0",
     "react-dom": "^16.13.1",
     "react-responsive": "^8.0.3",
     "react-router-dom": "^5.1.2",
     "react-scripts": "3.4.1",
-    "typescript": "^3.7.5"
+    "react-speech-kit": "^2.0.5",
+    "typescript": "^3.7.5",
+    "written-number": "^0.9.1"
   },
   "scripts": {
     "start": "react-scripts start",
