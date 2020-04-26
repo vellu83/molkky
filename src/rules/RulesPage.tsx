@@ -60,7 +60,7 @@ export const RulesPage = () => {
 };
 
 const Paragraph = styled.p`
-  padding: 16px;
+  padding: 6px 24px;
   text-align: justify;
 `;
 
@@ -73,10 +73,9 @@ const ImageWrapper = styled.div`
 `;
 
 const StyledTitle1 = styled(Title)`
-  text-align: 'center';
-  margin: '16px';
+  padding: 24px;
 `;
 
 const StyledTitle3 = styled(Title)`
-  text-align: 'center';
+  padding: 4px 24px;
 `;

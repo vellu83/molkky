@@ -1,11 +1,12 @@
+import { SmileOutlined, UndoOutlined, ReloadOutlined } from '@ant-design/icons';
 import styled from '@emotion/styled';
-import { Layout, Result, Button, Modal } from 'antd';
+import { Button, Layout, Modal, Result } from 'antd';
 import Title from 'antd/lib/typography/Title';
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
+import { useStickyState } from '../shared/hook';
 import { LastPlays } from '../shared/LastPlays';
 import { Leaderboard } from '../shared/Leaderboard';
 import { SkittlePositions } from '../shared/SkittlePositions';
-import { SmileOutlined, UndoOutlined } from '@ant-design/icons';
 import { Player } from './GamePage';
 
 const { Content } = Layout;
@@ -36,26 +37,24 @@ export const GameInProgress = ({
   players,
   onPlayAgainHandle,
 }: Props) => {
-  const [currentPlayer, setCurrentPlayer] = useState<Player>(
-    players[getRandomInt(players.length)]
+  const [currentPlayer, setCurrentPlayer] = useStickyState(
+    players[getRandomInt(players.length)] as Player,
+    'current-player'
   );
-  const [gameHistory, setGameHistory] = useState<GameState[]>([]);
+  const [gameHistory, setGameHistory] = useStickyState(
+    [] as GameState[],
+    'game-history'
+  );
   const gameHistoryRef = useRef(gameHistory);
-  const [winner, setWinner] = useState<Player>('');
+  const [winner, setWinner] = useStickyState('' as Player, 'winner');
 
   useEffect(() => {
-    const initialGameStep = new Map<Player, PlayerState>();
-    players.forEach((player) =>
-      initialGameStep.set(player, {
-        totalScore: 0,
-        score: 0,
-        missStreak: 0,
-        isCurrentPlayer: player === currentPlayer,
-        isEliminated: false,
-        hasWon: false,
-      })
-    );
-    setGameHistory([initialGameStep]);
+    if (window.localStorage.getItem('game-history')?.length! > 2) {
+      return;
+    }
+
+    const initialGameHistory = getInitialGameHistory();
+    setGameHistory(initialGameHistory);
   }, [players]);
 
   useEffect(() => {
@@ -80,6 +79,21 @@ export const GameInProgress = ({
 
   const mod = (n: number, m: number): number => {
     return ((n % m) + m) % m;
+  };
+
+  const getInitialGameHistory = (): GameState[] => {
+    const initialGameState = new Map<Player, PlayerState>();
+    players.forEach((player) =>
+      initialGameState.set(player, {
+        totalScore: 0,
+        score: 0,
+        missStreak: 0,
+        isCurrentPlayer: player === currentPlayer,
+        isEliminated: false,
+        hasWon: false,
+      })
+    );
+    return [initialGameState];
   };
 
   const getWinnerPlayer = (gameState: GameState): Player => {
@@ -138,6 +152,15 @@ export const GameInProgress = ({
   };
 
   const nextTurn = (gameState: GameState) => {
+    const isLastPlayerEliminated = gameState.get(currentPlayer)?.isEliminated;
+    if (isLastPlayerEliminated) {
+      const playerIndex = players.indexOf(currentPlayer);
+      const nextPlayerIndex = mod(playerIndex + 1, players.length);
+      const nextPlayer = players[nextPlayerIndex];
+      setCurrentPlayer(nextPlayer);
+      return;
+    }
+
     const runningPlayers = getRunningPlayers(gameState);
     const lastRunningPlayerIndex = runningPlayers.indexOf(currentPlayer);
     const nextPlayerIndex = mod(
@@ -156,7 +179,7 @@ export const GameInProgress = ({
 
     const newGameState = new Map(gameState);
     [...newGameState].forEach(([player, state]) =>
-      newGameState.set(player, { ...state, isCurrentPlayer: false })
+      newGameState.set(player, { ...(state as {}), isCurrentPlayer: false })
     );
     newGameState.set(player, playerState);
     setGameHistory([...gameHistory, newGameState]);
@@ -169,7 +192,7 @@ export const GameInProgress = ({
     }
 
     setWinner('');
-    const previousGameHistory = Array.from(gameHistory)!;
+    const previousGameHistory = Array.from(gameHistory)! as GameState[];
     previousGameHistory.pop();
     const previousPlayer = [
       ...previousGameHistory[previousGameHistory.length - 1],
@@ -180,6 +203,14 @@ export const GameInProgress = ({
     setGameHistory(previousGameHistory);
     gameHistoryRef.current = previousGameHistory;
   }, [gameHistory]);
+
+  const onPlayAgain = useCallback(() => {
+    setCurrentPlayer(players[getRandomInt(players.length)]);
+    const initialGameHistory = getInitialGameHistory();
+    setGameHistory(initialGameHistory);
+    gameHistoryRef.current = [];
+    setWinner('');
+  }, []);
 
   return (
     <Layout className='layout' style={{ width: '100%', height: '100%' }}>
@@ -216,26 +247,33 @@ export const GameInProgress = ({
           <ButtonsWrapper>
             <ButtonWrapper>
               <LastPlays
-                plays={gameHistory.reduce((prev, state) => {
-                  const gameState = [...state];
-                  const currentPlayerState = gameState.find(
-                    ([k, v]) => v.isCurrentPlayer
-                  )!;
+                plays={gameHistory.reduce(
+                  (prev: any, state: any, idx: number) => {
+                    if (idx === 0) {
+                      return prev;
+                    }
+                    const gameState = [...state];
+                    const currentPlayerState = gameState.find(
+                      ([k, v]) => v.isCurrentPlayer
+                    )!;
 
-                  prev.push({
-                    player: currentPlayerState[0],
-                    score: currentPlayerState[1].score,
-                  } as never);
+                    prev.push({
+                      player: currentPlayerState[0],
+                      score: currentPlayerState[1].score,
+                    } as never);
 
-                  return prev;
-                }, [])}
+                    return prev;
+                  },
+                  []
+                )}
               ></LastPlays>
             </ButtonWrapper>
-            <ButtonWrapper>
-              <Button danger icon={<UndoOutlined />} onClick={onUndoLast}>
-                Undo last
-              </Button>
-            </ButtonWrapper>
+            <StyledButton danger icon={<UndoOutlined />} onClick={onUndoLast}>
+              Undo
+            </StyledButton>
+            <StyledButton icon={<ReloadOutlined />} onClick={onPlayAgain}>
+              Restart
+            </StyledButton>
           </ButtonsWrapper>
         </ContentWrapper>
       </Content>
@@ -267,6 +305,9 @@ const ButtonsWrapper = styled.div`
 `;
 
 const ButtonWrapper = styled.div`
+  margin: 12px 18px;
+`;
+const StyledButton = styled(Button)`
   margin: 12px 18px;
 `;
 

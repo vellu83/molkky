@@ -1,17 +1,18 @@
 import { Layout } from 'antd';
-import React, { useState } from 'react';
+import React from 'react';
 import { AppFooter } from '../shared/AppFooter';
 import { GameInProgress } from './GameInProgress';
 import { NewGame } from './NewGame';
+import { useStickyState } from '../shared/hook';
 
 const { Content } = Layout;
 
 export type Player = string;
 
 export const GamePage = () => {
-  const [isPlaying, setPlaying] = useState(false);
-  const [gamePoints, setGamePoints] = useState(50);
-  const [players, setPlayers] = useState<Player[]>([]);
+  const [isPlaying, setPlaying] = useStickyState(false, 'is-playing');
+  const [gamePoints, setGamePoints] = useStickyState(50, 'game-points');
+  const [players, setPlayers] = useStickyState([] as Player[], 'players');
 
   const onGamePointsChangeHandle = (value: number) => {
     setGamePoints(value);

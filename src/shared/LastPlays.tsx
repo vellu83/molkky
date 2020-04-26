@@ -50,7 +50,7 @@ export const LastPlays = ({ plays }: Props) => {
       visible={visible}
       onVisibleChange={handleVisibleChange}
     >
-      <Button type='primary'>Show last plays</Button>
+      <Button type='primary'>Last throws</Button>
     </Popover>
   );
 };

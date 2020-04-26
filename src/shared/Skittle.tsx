@@ -25,4 +25,5 @@ const StyledButton = styled(Button)`
   width: 50px;
   min-width: 50px;
   font-size: 20px;
+  margin: 1px 2px;
 `;
