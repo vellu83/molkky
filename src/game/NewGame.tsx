@@ -10,7 +10,12 @@ import {
   Typography,
 } from 'antd';
 import React, { useEffect, useState } from 'react';
-import { isAndroid, isIOS } from 'react-device-detect';
+import {
+  isAndroid,
+  isIOS,
+  isMobileSafari,
+  isChrome,
+} from 'react-device-detect';
 import fans from './fans.svg';
 import { Player } from './GamePage';
 
@@ -33,10 +38,10 @@ export const NewGame = ({
   useEffect(() => {
     const isPWAInstalled = window.matchMedia('(display-mode: standalone)')
       .matches;
-    if (isAndroid && !isPWAInstalled) {
+    if (isAndroid && isChrome && !isPWAInstalled) {
       message.info('Tap "Add to home screen" to install the app.');
     }
-    if (isIOS && !isPWAInstalled) {
+    if (isIOS && isMobileSafari && !isPWAInstalled) {
       message.info(
         'Tap the Share button and "Add to home screen" to install the app.'
       );

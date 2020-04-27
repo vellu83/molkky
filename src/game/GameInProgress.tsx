@@ -13,7 +13,6 @@ import {
   Modal,
   notification,
   Result,
-  message,
 } from 'antd';
 import Title from 'antd/lib/typography/Title';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -85,11 +84,12 @@ export const GameInProgress = ({
 
   const requestMicPermission = async () => {
     if (!isMicAuthorized) {
-      const audio = await navigator.mediaDevices.getUserMedia({
-        audio: true,
-        video: false,
-      });
-      setMicAuthorized(audio.active);
+      navigator.mediaDevices
+        .getUserMedia({ video: true, audio: true })
+        .then(() => setMicAuthorized(true))
+        .catch(() =>
+          notification.error({ message: 'cannot authorize microphone' })
+        );
     }
   };
 
