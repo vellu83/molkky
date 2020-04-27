@@ -115,8 +115,18 @@ export const GameInProgress = ({
   }, [currentPlayer]);
 
   useEffect(() => {
-    const gameState = gameHistory[gameHistory.length - 1];
+    const gameState: GameState = gameHistory[gameHistory.length - 1];
     if (!gameState || isGameFinished(gameState)) {
+      return;
+    }
+    const previousGameState: GameState = gameHistory[gameHistory.length - 2];
+    if (
+      previousGameState &&
+      previousGameState.get(currentPlayer)?.missStreak ===
+        gameState.get(currentPlayer)?.missStreak &&
+      previousGameState.get(currentPlayer)?.totalScore ===
+        gameState.get(currentPlayer)?.totalScore
+    ) {
       return;
     }
     nextTurn(gameState);
