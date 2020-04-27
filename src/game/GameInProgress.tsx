@@ -13,9 +13,10 @@ import {
   Modal,
   notification,
   Result,
+  message,
 } from 'antd';
 import Title from 'antd/lib/typography/Title';
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useSpeechRecognition } from 'react-speech-kit';
 import { useStickyState } from '../shared/hook';
 import { LastPlays } from '../shared/LastPlays';
@@ -62,6 +63,7 @@ export const GameInProgress = ({
   );
   const gameHistoryRef = useRef(gameHistory);
   const [winner, setWinner] = useStickyState('' as Player, 'winner');
+  const [isMicAuthorized, setMicAuthorized] = useState(false);
   const outcomes: string[] = [
     ...Array.from({ length: 12 }, (x, i) => `${i}`),
     ...Array.from({ length: 12 }, (x, i) => writtenNumber(i, { lang: 'fr' })),
@@ -75,9 +77,21 @@ export const GameInProgress = ({
         const detectedValue = +outcomes[mod(resultIndex, 12)];
         onClick(detectedValue);
         notification.success({ message: `${detectedValue} detected` });
+      } else {
+        notification.error({ message: `Invalid: ${result} detected` });
       }
     },
   });
+
+  const requestMicPermission = async () => {
+    if (!isMicAuthorized) {
+      const audio = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: false,
+      });
+      setMicAuthorized(audio.active);
+    }
+  };
 
   useEffect(() => {
     if (window.localStorage.getItem('game-history')?.length! > 2) {
@@ -265,6 +279,9 @@ export const GameInProgress = ({
                 icon={<AudioOutlined />}
                 onMouseDown={listen}
                 onMouseUp={stop}
+                onClick={() => {
+                  requestMicPermission();
+                }}
               ></StyledButton>
             </GameWrapper>
           ) : (
