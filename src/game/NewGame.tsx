@@ -25,12 +25,14 @@ type Props = {
   lastPlayers: Player[];
   onGamePointsChangeHandle: Function;
   onFinishHandle: Function;
+  pullo:string;
 };
 
 export const NewGame = ({
   lastPlayers,
   onGamePointsChangeHandle,
   onFinishHandle,
+  pullo
 }: Props) => {
   const [numberPlayers, setNumberPlayers] = useState(0);
   const [options, setOptions] = useState<{ value: string }[]>([]);
@@ -52,7 +54,7 @@ export const NewGame = ({
     <Layout className='layout' style={{ width: '100%' }}>
       <StyledTitle>New Game</StyledTitle>
       <ImageWrapper>
-        <img src={fans} alt='logo'></img>
+        <img src={pullo} alt='logo' style={{height:100}}></img>
       </ImageWrapper>
       <StyledForm
         name='dynamic_form_item'

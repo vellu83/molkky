@@ -6,14 +6,15 @@ import React from 'react';
 type Props = {
   value: number;
   onClickHandle: Function;
+  pullo:string
 };
 
 
-export const Skittle = ({ value, onClickHandle }: Props) => {
+export const Skittle = ({ value, onClickHandle, pullo }: Props) => {
 
 
   return (
-    <StyledButton
+    <StyledButton style={{backgroundImage:`url("${pullo}")`}}
 
       onClick={() => onClickHandle(value)}
     >
@@ -28,7 +29,6 @@ const StyledButton = styled.button`
   min-width: 50px;
   font-size: 20px;
   margin: 1px 2px;
-  background-image: url("karhu.png");
   background-size: 50px;
   border: none;
   color: blue;

@@ -15,6 +15,9 @@ export const GamePage = () => {
   const [gamePoints, setGamePoints] = useStickyState(50, 'pisteet');
   const [players, setPlayers] = useStickyState([] as Player[], 'pelaajat');
   const [lastPlayers, setLastPlayers] = useState<Player[]>([]);
+  const [pullo, setPullo] = useState('jallu.jpg')
+
+
 
   const onGamePointsChangeHandle = (value: number) => {
     setGamePoints(value);
@@ -42,8 +45,9 @@ export const GamePage = () => {
               lastPlayers={lastPlayers}
               onFinishHandle={onFinishHandle}
               onGamePointsChangeHandle={onGamePointsChangeHandle}
+              pullo={pullo}
             ></NewGame>
-            <BottleList />
+
           </>
 
         ) : (
@@ -51,8 +55,11 @@ export const GamePage = () => {
             gamePoints={gamePoints}
             players={players}
             onNewGameHandle={onNewGameHandle}
+            pullo={pullo}
           ></GameInProgress>
         )}
+
+        <BottleList setPullo={setPullo} />
       </Content>
       <AppFooter></AppFooter>
     </Layout>
