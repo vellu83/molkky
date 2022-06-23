@@ -45,8 +45,9 @@ export const GamePage = () => {
               lastPlayers={lastPlayers}
               onFinishHandle={onFinishHandle}
               onGamePointsChangeHandle={onGamePointsChangeHandle}
+              pullo={pullo}
             ></NewGame>
-            <BottleList setPullo={setPullo} />
+
           </>
 
         ) : (
@@ -57,6 +58,8 @@ export const GamePage = () => {
             pullo={pullo}
           ></GameInProgress>
         )}
+
+        <BottleList setPullo={setPullo} />
       </Content>
       <AppFooter></AppFooter>
     </Layout>

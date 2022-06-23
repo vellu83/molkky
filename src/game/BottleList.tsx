@@ -4,10 +4,10 @@ import React from 'react';
 
 
 type BottleProps = {
-  setPullo:Function
+  setPullo: Function
 }
 
-const BottleList = ({setPullo}:BottleProps) => {
+const BottleList = ({ setPullo }: BottleProps) => {
 
   const menu = (
     <Menu >
@@ -17,23 +17,25 @@ const BottleList = ({setPullo}:BottleProps) => {
         </a>
       </Menu.Item>
       <Menu.Item key='minttu'>
-        <img src="minttu.png" alt="suu napsaa" style={{ width: 70 }} onClick={() => setPullo('minttu.png')}/>
+        <img src="minttu.png" alt="suu napsaa" style={{ width: 70 }} onClick={() => setPullo('minttu.png')} />
       </Menu.Item>
       <Menu.Item key='karhu'>
-        <img src="karhu.png" alt="suu napsaa" style={{ width: 70 }} onClick={() => setPullo('karhu.png')}/>
+        <img src="karhu.png" alt="suu napsaa" style={{ width: 70 }} onClick={() => setPullo('karhu.png')} />
       </Menu.Item>
     </Menu>
   );
 
 
   return (
-  <Dropdown overlay={menu}>
-      <Space>
-        Valitse kuva
-        <DownOutlined />
-      </Space>
-  </Dropdown>
+    <div style={{ display: 'flex', justifyContent: 'center' }} >
+      <Dropdown overlay={menu}>
+        <Space>
+          Valitse kuva
+          <DownOutlined />
+        </Space>
+      </Dropdown>
+    </div>
   )
-  };
+};
 
 export default BottleList
