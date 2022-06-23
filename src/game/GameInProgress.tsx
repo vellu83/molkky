@@ -45,12 +45,14 @@ type Props = {
   gamePoints: number;
   players: Player[];
   onNewGameHandle: Function;
+  pullo:string
 };
 
 export const GameInProgress = ({
   gamePoints,
   players,
   onNewGameHandle,
+  pullo
 }: Props) => {
   const [currentPlayer, setCurrentPlayer] = useStickyState(
     players[getRandomInt(players.length)] as Player,
@@ -282,6 +284,7 @@ export const GameInProgress = ({
               >{`${currentPlayer} is playing...`}</StyledTitle>
               <SkittlePositions
                 onClickHandle={(v: number) => onClick(v)}
+                pullo={pullo}
               ></SkittlePositions>
               <StyledButton
                 shape='circle'
