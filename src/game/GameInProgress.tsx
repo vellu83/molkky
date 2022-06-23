@@ -54,11 +54,11 @@ export const GameInProgress = ({
 }: Props) => {
   const [currentPlayer, setCurrentPlayer] = useStickyState(
     players[getRandomInt(players.length)] as Player,
-    'current-player'
+    'tämän hetkinen pelaaja'
   );
   const [gameHistory, setGameHistory] = useStickyState(
     [] as GameState[],
-    'game-history'
+    'peli-historia'
   );
   const gameHistoryRef = useRef(gameHistory);
   const [winner, setWinner] = useStickyState('' as Player, 'winner');
@@ -88,13 +88,13 @@ export const GameInProgress = ({
         .getUserMedia({ video: true, audio: true })
         .then(() => setMicAuthorized(true))
         .catch(() =>
-          notification.error({ message: 'cannot authorize microphone' })
+          notification.error({ message: 'ei voi käyttää mikrofonia' })
         );
     }
   };
 
   useEffect(() => {
-    if (window.localStorage.getItem('game-history')?.length! > 2) {
+    if (window.localStorage.getItem('peli-historia')?.length! > 2) {
       return;
     }
 
@@ -180,7 +180,7 @@ export const GameInProgress = ({
     if (playerState.missStreak === 2) {
       Modal.warning({
         title: 'VLUGUL!',
-        content: `${currentPlayer} must hit a skittle or is eliminated`,
+        content: `${currentPlayer} sinun on osuttava tai tiput`,
       });
     }
   };
@@ -192,7 +192,7 @@ export const GameInProgress = ({
     if (newMissStreak === 3) {
       Modal.error({
         title: 'VLUGUL!',
-        content: `${currentPlayer} is Out!`,
+        content: `${currentPlayer} tippui pois :( )`,
       });
     }
     return {

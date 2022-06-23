@@ -11,9 +11,9 @@ const { Content } = Layout;
 export type Player = string;
 
 export const GamePage = () => {
-  const [isPlaying, setPlaying] = useStickyState(false, 'is-playing');
-  const [gamePoints, setGamePoints] = useStickyState(50, 'game-points');
-  const [players, setPlayers] = useStickyState([] as Player[], 'players');
+  const [isPlaying, setPlaying] = useStickyState(false, 'pelaa');
+  const [gamePoints, setGamePoints] = useStickyState(50, 'pisteet');
+  const [players, setPlayers] = useStickyState([] as Player[], 'pelaajat');
   const [lastPlayers, setLastPlayers] = useState<Player[]>([]);
 
   const onGamePointsChangeHandle = (value: number) => {
