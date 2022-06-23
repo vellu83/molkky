@@ -1,18 +1,20 @@
-import { Button } from 'antd';
+
 import styled from '@emotion/styled';
 import React from 'react';
+
 
 type Props = {
   value: number;
   onClickHandle: Function;
 };
 
+
 export const Skittle = ({ value, onClickHandle }: Props) => {
+
+
   return (
     <StyledButton
-      type='primary'
-      shape='circle'
-      size='large'
+
       onClick={() => onClickHandle(value)}
     >
       {value}
@@ -20,10 +22,16 @@ export const Skittle = ({ value, onClickHandle }: Props) => {
   );
 };
 
-const StyledButton = styled(Button)`
+const StyledButton = styled.button`
   height: 50px;
   width: 50px;
   min-width: 50px;
   font-size: 20px;
   margin: 1px 2px;
+  background-image: url("karhu.png");
+  background-size: 50px;
+  border: none;
+  color: blue;
+  font-weight: bold;
+  
 `;
