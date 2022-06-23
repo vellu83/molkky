@@ -30,7 +30,7 @@ const BottleList = ({ setPullo }: BottleProps) => {
     <div style={{ display: 'flex', justifyContent: 'center' }} >
       <Dropdown overlay={menu}>
         <Space>
-          Valitse kuva
+          Select picture
           <DownOutlined />
         </Space>
       </Dropdown>
