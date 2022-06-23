@@ -4,6 +4,7 @@ import { AppFooter } from '../shared/AppFooter';
 import { useStickyState } from '../shared/hook';
 import { GameInProgress } from './GameInProgress';
 import { NewGame } from './NewGame';
+import BottleList from './BottleList'
 
 const { Content } = Layout;
 
@@ -36,11 +37,15 @@ export const GamePage = () => {
     <Layout className='layout' style={{ height: '100vh', width: '100%' }}>
       <Content style={{ overflow: 'auto' }}>
         {!isPlaying ? (
-          <NewGame
-            lastPlayers={lastPlayers}
-            onFinishHandle={onFinishHandle}
-            onGamePointsChangeHandle={onGamePointsChangeHandle}
-          ></NewGame>
+          <>
+            <NewGame
+              lastPlayers={lastPlayers}
+              onFinishHandle={onFinishHandle}
+              onGamePointsChangeHandle={onGamePointsChangeHandle}
+            ></NewGame>
+            <BottleList />
+          </>
+
         ) : (
           <GameInProgress
             gamePoints={gamePoints}
